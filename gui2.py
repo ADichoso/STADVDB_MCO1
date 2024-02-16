@@ -259,22 +259,41 @@ ax4_1.legend()
 #####################################################################################
 # Chart 4.1.1: FURTHER refine to group appointments according to gender of patients #
 #####################################################################################
+df = pd.read_csv("datasets/number4/4.1.1.csv")
+# Create a figure and axis for plotting
+fig4_1_1, ax4_1_1 = plt.subplots()
 
-# Chart 5: Area chart of inventory by month
-fig5, ax5 = plt.subplots()
-ax5.fill_between(inventory_month_data.keys(),
-                 inventory_month_data.values())
-ax5.set_title("Inventory by Month")
-ax5.set_xlabel("Month")
-ax5.set_ylabel("Inventory")
+# Group data by main specialty, virtual status, and gender
+grouped = df.groupby(['mainspecialty', 'isvirtual', 'gender'])
+
+# Set the bar width
+bar_width = 0.2
+
+# Define colors for each gender
+colors = {'FEMALE': 'skyblue', 'MALE': 'orange'}
+
+# Plot bars for each group
+bar_positions = range(len(grouped))
+for i, ((specialty, isvirtual, gender), group) in enumerate(grouped):
+    ax4_1_1.bar(i, group['average_patient_age'], bar_width, label=f'{specialty} - {"Virtual" if isvirtual == 1 else "Non-Virtual"} - {gender}', color=colors[gender])
+
+# Add labels and title
+ax4_1_1.set_xlabel('Specialty, Virtual Status, and Gender')
+ax4_1_1.set_ylabel('Average Patient Age')
+ax4_1_1.set_title('Average Patient Age by Specialty, Virtual Status, and Gender')
+ax4_1_1.set_xticks(range(len(grouped)))
+ax4_1_1.set_xticklabels([f'{specialty}\n{"Virtual" if isvirtual == 1 else "Non-Virtual"} - {gender}' for (specialty, isvirtual, gender), _ in grouped], rotation=45, ha='right', fontsize=5)
+
+# Add a legend with custom handles
+handles, labels = ax4_1_1.get_legend_handles_labels()
+ax4_1_1.legend(handles, labels)
 
 #place all figures in this list
 figure_list = [
     [fig1, fig1_1, fig1_2, fig1_3, fig1_4],
     [fig2, fig2_1, fig2_2, fig2_3],
     [fig3, fig3_1, fig3_2], 
-    [fig4, fig4_1], 
-    [fig4, fig1]
+    [fig4, fig4_1, fig4_1_1]
 ]
 
 #GUI
