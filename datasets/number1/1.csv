@@ -1,0 +1,12 @@
+city,appointment_year,virtual_appointments,non_virtual_appointments
+Makati,2011,0,1000
+Makati,2012,0,1000
+Makati,2013,0,1000
+Manila,2015,0,2018
+Manila,2016,0,3888
+Manila,2017,0,3094
+"Quezon City",2016,0,697
+"Quezon City",2017,0,19465
+"Quezon City",2018,0,22261
+"Quezon City",2019,0,30406
+"Quezon City",2020,0,23171
