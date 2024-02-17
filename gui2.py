@@ -3,6 +3,9 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import matplotlib.pyplot as plt
 import pandas as pd
 
+#pip install matplotlib
+#pip install numpy
+
 #Create charts
 ######################################################################################################################################
 # Chart 1: Get yearly count of appointments, grouped into virtual and non-virtual appointments, for each city (roll-up & drill down) #
