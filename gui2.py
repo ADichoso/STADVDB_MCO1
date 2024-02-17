@@ -223,71 +223,66 @@ ax3_2.set_title(f'Average Appointments on Mondays in Clinics in {city_of_interes
 # Chart 4: Average age and average appointment duration of patients taking an appointment, grouped by specialties of doctors (join, patients, appointments, and doctors) #
 ##########################################################################################################################################################################
 df = pd.read_csv("datasets/number4/4.csv")
+df['average_appointment_duration_minutes'] = df['average_appointment_duration_minutes'].abs()
 fig4, ax4 = plt.subplots()
-# plot average patient age
-ax4.bar(df['mainspecialty'], df['average_patient_age'], color='skyblue', label='Average Patient Age')
-# create a second y-axis for appointment duration
-ax4i = ax4.twinx()
-ax4i.bar(df['mainspecialty'], df['average_appointment_duration_minutes'], color='orange', label='Average Appointment Duration')
-# add labels and title
+# plot Average Patient Age
+ax4.bar(df['mainspecialty'], df['average_patient_age'], color='skyblue')
+ax4.set_title('Average Patient Age by Specialty')
 ax4.set_xlabel('Specialty')
-ax4.set_ylabel('Average Patient Age')
+ax4.set_ylabel('Average Age')
+# add a secondary y-axis for appointment duration
+ax4i = ax4.twinx()
+ax4i.plot(df['mainspecialty'], df['average_appointment_duration_minutes'], color='lightgreen', marker='o', linestyle='-')
 ax4i.set_ylabel('Average Appointment Duration (minutes)')
-ax4.set_title('Average Patient Age and Appointment Duration by Specialty')
+
 
 #############################################################################################
 # Chart 4.1: refine to group appointments according to virtual and non virtual appointments #
 #############################################################################################
 df = pd.read_csv("datasets/number4/4.1.csv")
+df['average_appointment_duration_minutes'] = df['average_appointment_duration_minutes'].abs()
+virtual_df = df[df['isvirtual'] == 1]
+non_virtual_df = df[df['isvirtual'] == 0]
 fig4_1, ax4_1 = plt.subplots()
-# group data by main specialty and virtual status
-grouped = df.groupby(['mainspecialty', 'isvirtual'])
-# set the bar width
-bar_width = 0.35
-# plot bars for each group
-bar_positions = range(len(grouped))
-for i, ((specialty, isvirtual), group) in enumerate(grouped):
-    ax4_1.bar(i - bar_width/2, group['average_patient_age'], bar_width, label=f'{specialty} - {"Virtual" if isvirtual == 1 else "Non-Virtual"}', color='skyblue')
-    ax4_1.bar(i + bar_width/2, group['average_appointment_duration_minutes'], bar_width, color='orange')
-# set labels
-ax4_1.set_xlabel('Specialty and Virtual Status')
-ax4_1.set_ylabel('Average Patient Age / Appointment Duration (minutes)')
-ax4_1.set_title('Average Patient Age and Appointment Duration by Specialty and Virtual Status')
-ax4_1.set_xticks(range(len(grouped)))
-ax4_1.set_xticklabels([f'{specialty}\n{"Virtual" if isvirtual == 1 else "Non-Virtual"}' for (specialty, isvirtual), _ in grouped])
+# plot average patient age for virtual and non virtual appointments
+ax4_1.bar(virtual_df['mainspecialty'], virtual_df['average_patient_age'], color='skyblue', label='Virtual')
+ax4_1.bar(non_virtual_df['mainspecialty'], non_virtual_df['average_patient_age'], color='lightgreen', label='Non-Virtual')
+ax4_1.set_title('Average Patient Age by Specialty and Appointment Type')
+ax4_1.set_xlabel('Specialty')
+ax4_1.set_ylabel('Average Age')
 ax4_1.legend()
+# add a secondary y-axis for appointment duration
+ax4_1i = ax4_1.twinx()
+# plot average appointment Duration for virtual and non virtual appointments
+ax4_1i.plot(virtual_df['mainspecialty'], virtual_df['average_appointment_duration_minutes'], color='blue', marker='o', linestyle='-', label='Virtual')
+ax4_1i.plot(non_virtual_df['mainspecialty'], non_virtual_df['average_appointment_duration_minutes'], color='green', marker='o', linestyle='-', label='Non-Virtual')
+ax4_1i.set_ylabel('Average Appointment Duration (minutes)')
 
 #####################################################################################
 # Chart 4.1.1: FURTHER refine to group appointments according to gender of patients #
 #####################################################################################
 df = pd.read_csv("datasets/number4/4.1.1.csv")
-# Create a figure and axis for plotting
+# create a figure and axis for plotting
 fig4_1_1, ax4_1_1 = plt.subplots()
-
-# Group data by main specialty, virtual status, and gender
+# group data by main specialty, virtual status, and gender
 grouped = df.groupby(['mainspecialty', 'isvirtual', 'gender'])
-
-# Set the bar width
+# set the bar width
 bar_width = 0.2
-
-# Define colors for each gender
+# define colors for each gender
 colors = {'FEMALE': 'skyblue', 'MALE': 'orange'}
-
-# Plot bars for each group
+# plot bars for each group
 bar_positions = range(len(grouped))
 for i, ((specialty, isvirtual, gender), group) in enumerate(grouped):
     ax4_1_1.bar(i, group['average_patient_age'], bar_width, label=f'{specialty} - {"Virtual" if isvirtual == 1 else "Non-Virtual"} - {gender}', color=colors[gender])
-
-# Add labels and title
+# add labels and title
 ax4_1_1.set_xlabel('Specialty, Virtual Status, and Gender')
 ax4_1_1.set_ylabel('Average Patient Age')
 ax4_1_1.set_title('Average Patient Age by Specialty, Virtual Status, and Gender')
 ax4_1_1.set_xticks(range(len(grouped)))
 ax4_1_1.set_xticklabels([f'{specialty}\n{"Virtual" if isvirtual == 1 else "Non-Virtual"} - {gender}' for (specialty, isvirtual, gender), _ in grouped], rotation=45, ha='right', fontsize=5)
-
-# Add a legend with custom handles
-handles, labels = ax4_1_1.get_legend_handles_labels()
-ax4_1_1.legend(handles, labels)
+# add a legend with custom handles
+#handles, labels = ax4_1_1.get_legend_handles_labels()
+#ax4_1_1.legend(handles, labels)
 
 #place all figures in this list
 figure_list = [
