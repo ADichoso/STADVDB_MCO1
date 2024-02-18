@@ -10,9 +10,9 @@ import pandas as pd
 ######################################################################################################################################
 # Chart 1: Get yearly count of appointments, grouped into virtual and non-virtual appointments, for each city (roll-up & drill down) #
 ######################################################################################################################################
-df = pd.read_csv("datasets/number1/1.csv")
+df1 = pd.read_csv("datasets/number1/1.csv")
 #group data by city
-grouped = df.groupby('city')
+grouped = df1.groupby('city')
 fig1, ax1 = plt.subplots()
 #plot data for each city
 for city, group in grouped:
@@ -27,9 +27,9 @@ ax1.legend()
 #########################################################################
 # Chart 1.1: refine by showing yearly count for each province (roll-up) #
 #########################################################################
-df = pd.read_csv("datasets/number1/1.1.csv")
+df1_1 = pd.read_csv("datasets/number1/1.1.csv")
 #group data by province
-grouped = df.groupby('province')
+grouped = df1_1.groupby('province')
 fig1_1, ax1_1 = plt.subplots()
 #plot data for each province
 for province, group in grouped:
@@ -45,9 +45,9 @@ ax1_1.grid(True)
 #######################################################################
 # Chart 1_2: refine by showing yearly count for each region (roll-up) #
 #######################################################################
-df = pd.read_csv("datasets/number1/1.2.csv")
+df1_2 = pd.read_csv("datasets/number1/1.2.csv")
 #filter data
-df_ncr = df[df['region_name'] == "National Capital Region (NCR)"]
+df_ncr = df1_2[df1_2['region_name'] == "National Capital Region (NCR)"]
 fig1_2, ax1_2 = plt.subplots()
 #plot data
 ax1_2.plot(df_ncr['appointment_year'], df_ncr['virtual_appointments'], label='NCR - Virtual')
@@ -62,9 +62,9 @@ ax1_2.grid(True)
 #########################################################################################################
 # Chart 1_3: only look at 1 specific year (showing appointments for each city in the year 2020) (slice) #
 #########################################################################################################
-df = pd.read_csv("datasets/number1/1.3.csv")
+df1_3 = pd.read_csv("datasets/number1/1.3.csv")
 #filter data for year 2020
-df_2020 = df[df['appointment_year'] == 2020]
+df_2020 = df1_3[df1_3['appointment_year'] == 2020]
 fig1_3, ax1_3 = plt.subplots()
 #plot data
 ax1_3.bar(df_2020['city'], df_2020['virtual_appointments'], label='Virtual Appointments')
@@ -79,11 +79,11 @@ ax1_3.legend()
 ################################################################################################
 # Chart 1_4: Yearly count of appointments from 2020-2021, for Region IVA (CALABARZON (IV-A)) and Region IVB(MIMAROPA (IV-B)) (dice) #
 ################################################################################################
-df = pd.read_csv("datasets/number1/1.4.csv")
+df1_4 = pd.read_csv("datasets/number1/1.4.csv")
 #filter data for region iva and region ivb and years 2020-2021
 regions = ["CALABARZON (IV-A)", "MIMAROPA (IV-B)"]
 years = [2020, 2021]
-df_filtered = df[(df['region_name'].isin(regions)) & (df['appointment_year'].isin(years))]
+df_filtered = df1_4[(df1_4['region_name'].isin(regions)) & (df1_4['appointment_year'].isin(years))]
 fig1_4, ax1_4 = plt.subplots()
 # group data by region name and year
 grouped = df_filtered.groupby(['region_name', 'appointment_year'])
@@ -101,10 +101,10 @@ ax1_4.grid(True)
 #######################################################
 # Chart 2: Total number of appointments per specialty #
 #######################################################
-df = pd.read_csv("datasets/number2/2.csv")
+df2 = pd.read_csv("datasets/number2/2.csv")
 fig2, ax2 = plt.subplots()
 # plot data as bar chart
-ax2.bar(df['specialty'], df['total_appointments'], color='skyblue')
+ax2.bar(df2['specialty'], df2['total_appointments'], color='skyblue')
 # set labels
 ax2.set_xlabel('Specialty')
 ax2.set_ylabel('Total Appointments')
@@ -114,10 +114,10 @@ ax2.set_title('Total Appointments by Specialty')
 ###########################################################################
 # Chart 2.1: refine by showing yearly count of appointments per specialty #
 ###########################################################################
-df = pd.read_csv("datasets/number2/2.1.csv")
+df2_1 = pd.read_csv("datasets/number2/2.1.csv")
 fig2_1, ax2_1 = plt.subplots()
 # group data by specialty and appointment year
-grouped = df.groupby(['specialty', 'appointment_year']).sum().reset_index()
+grouped = df2_1.groupby(['specialty', 'appointment_year']).sum().reset_index()
 # plot data for each specialty
 for specialty, group in grouped.groupby('specialty'):
     ax2_1.plot(group['appointment_year'], group['total_appointments'], label=specialty)
@@ -131,10 +131,10 @@ ax2_1.grid(True)
 ############################################################################
 # Chart 2.2: Refine by showing monthly count of appointments per specialty #
 ############################################################################
-df = pd.read_csv("datasets/number2/2.2.csv")
+df2_2 = pd.read_csv("datasets/number2/2.2.csv")
 fig2_2, ax2_2 = plt.subplots()
 # group data by specialty, appointment year, and appointment month
-grouped = df.groupby(['specialty', 'appointment_year', 'appointment_month']).sum().reset_index()
+grouped = df2_2.groupby(['specialty', 'appointment_year', 'appointment_month']).sum().reset_index()
 # plot data for each specialty
 for specialty, group in grouped.groupby('specialty'):
     ax2_2.plot(group['appointment_month'], group['total_appointments'], label=specialty)
@@ -148,11 +148,11 @@ ax2_2.grid(True)
 ########################################################################################################################################
 # Chart 2.3: Refine by filtering appointments in a certain year and specialty (I.E. 2020-2021, ENT / General Medicine, dice operation) #
 ########################################################################################################################################
-df = pd.read_csv("datasets/number2/2.3.csv")
+df2_3 = pd.read_csv("datasets/number2/2.3.csv")
 # filter data for the specific specialty and year
 specialty = "ENT / General Medicine"
 years = [2020, 2021]
-df_filtered = df[(df['specialty'] == specialty) & (df['appointment_year'].isin(years))]
+df_filtered = df2_3[(df2_3['specialty'] == specialty) & (df2_3['appointment_year'].isin(years))]
 fig2_3, ax2_3 = plt.subplots()
 # plot data as a bar chart
 ax2_3.bar(df_filtered['appointment_year'], df_filtered['total_appointments'], color='skyblue')
@@ -164,10 +164,10 @@ ax2_3.set_title(f'Total Appointments for {specialty} in {years}')
 ################################################################################################
 # Chart 3: Average number of appointments during a specific day, for each city (monday-sunday) #
 ################################################################################################
-df = pd.read_csv("datasets/number3/3.csv")
+df3 = pd.read_csv("datasets/number3/3.csv")
 fig3, ax3 = plt.subplots()
 # plot data as a bar chart
-ax3.bar(df['city'], df['avg_appointments_on_monday'], color='skyblue')
+ax3.bar(df3['city'], df3['avg_appointments_on_monday'], color='skyblue')
 # set labels and title
 ax3.set_xlabel('City')
 ax3.set_ylabel('Average Appointments on Mondays')
@@ -177,10 +177,10 @@ ax3.set_title('Average Appointments on Mondays by City')
 ##############################################################################
 # Chart 3.1: Refine to group appointment count according to appointment type #
 ##############################################################################
-df = pd.read_csv("datasets/number3/3.1.csv")
+df3_1 = pd.read_csv("datasets/number3/3.1.csv")
 fig3_1, ax3_1 = plt.subplots()
 # group data by city and appointment type
-grouped = df.groupby(['city', 'appttype']).mean().reset_index()
+grouped = df3_1.groupby(['city', 'appttype']).mean().reset_index()
 # get unique cities and appointment types
 cities = grouped['city'].unique()
 appointment_types = grouped['appttype'].unique()
@@ -203,11 +203,11 @@ ax3_1.legend()
 ########################################################################
 # Chart 3.2: Refine to show Appointments in Clinics in a specific city #
 ########################################################################
-df = pd.read_csv("datasets/number3/3.2.csv")
+df3_2 = pd.read_csv("datasets/number3/3.2.csv")
 # specify the city you're interested in
 city_of_interest = "Manila"
 # filter data for the specific city
-df_filtered = df[df['city'] == city_of_interest]
+df_filtered = df3_2[df3_2['city'] == city_of_interest]
 # calculate the average number of appointments on Mondays for the city
 avg_appointments = df_filtered['avg_appointments_on_monday'].mean()
 # create a figure and axis for plotting
@@ -222,27 +222,27 @@ ax3_2.set_title(f'Average Appointments on Mondays in Clinics in {city_of_interes
 ##########################################################################################################################################################################
 # Chart 4: Average age and average appointment duration of patients taking an appointment, grouped by specialties of doctors (join, patients, appointments, and doctors) #
 ##########################################################################################################################################################################
-df = pd.read_csv("datasets/number4/4.csv")
-df['average_appointment_duration_minutes'] = df['average_appointment_duration_minutes'].abs()
+df4 = pd.read_csv("datasets/number4/4.csv")
+df4['average_appointment_duration_minutes'] = df4['average_appointment_duration_minutes'].abs()
 fig4, ax4 = plt.subplots()
 # plot Average Patient Age
-ax4.bar(df['mainspecialty'], df['average_patient_age'], color='skyblue')
+ax4.bar(df4['mainspecialty'], df4['average_patient_age'], color='skyblue')
 ax4.set_title('Average Patient Age by Specialty')
 ax4.set_xlabel('Specialty')
 ax4.set_ylabel('Average Age')
 # add a secondary y-axis for appointment duration
 ax4i = ax4.twinx()
-ax4i.plot(df['mainspecialty'], df['average_appointment_duration_minutes'], color='lightgreen', marker='o', linestyle='-')
+ax4i.plot(df4['mainspecialty'], df4['average_appointment_duration_minutes'], color='lightgreen', marker='o', linestyle='-')
 ax4i.set_ylabel('Average Appointment Duration (minutes)')
 
 
 #############################################################################################
 # Chart 4.1: refine to group appointments according to virtual and non virtual appointments #
 #############################################################################################
-df = pd.read_csv("datasets/number4/4.1.csv")
-df['average_appointment_duration_minutes'] = df['average_appointment_duration_minutes'].abs()
-virtual_df = df[df['isvirtual'] == 1]
-non_virtual_df = df[df['isvirtual'] == 0]
+df4_1 = pd.read_csv("datasets/number4/4.1.csv")
+df4_1['average_appointment_duration_minutes'] = df4_1['average_appointment_duration_minutes'].abs()
+virtual_df = df4_1[df4_1['isvirtual'] == 1]
+non_virtual_df = df4_1[df4_1['isvirtual'] == 0]
 fig4_1, ax4_1 = plt.subplots()
 # plot average patient age for virtual and non virtual appointments
 ax4_1.bar(virtual_df['mainspecialty'], virtual_df['average_patient_age'], color='skyblue', label='Virtual')
@@ -261,11 +261,11 @@ ax4_1i.set_ylabel('Average Appointment Duration (minutes)')
 #####################################################################################
 # Chart 4.1.1: FURTHER refine to group appointments according to gender of patients #
 #####################################################################################
-df = pd.read_csv("datasets/number4/4.1.1.csv")
+df4_1_1 = pd.read_csv("datasets/number4/4.1.1.csv")
 # create a figure and axis for plotting
 fig4_1_1, ax4_1_1 = plt.subplots()
 # group data by main specialty, virtual status, and gender
-grouped = df.groupby(['mainspecialty', 'isvirtual', 'gender'])
+grouped = df4_1_1.groupby(['mainspecialty', 'isvirtual', 'gender'])
 # set the bar width
 bar_width = 0.2
 # define colors for each gender
@@ -292,44 +292,74 @@ figure_list = [
     [fig4, fig4_1, fig4_1_1]
 ]
 
+df_list = [
+    [df1, df1_1, df1_2, df1_3, df1_4],
+    [df2, df2_1, df2_2, df2_3],
+    [df3, df3_1, df3_2], 
+    [df4, df4_1, df4_1_1]
+]
+
 #GUI
 root = tk.Tk()
 root.title('OLAP Application')
+root.geometry("800x450")
+root.pack_propagate(0)
 
 side_frame = tk.Frame(root, padx=5, pady=5)
 side_frame.pack(side="left", padx=5,pady=5, fill="y")
 
 canvas1 = FigureCanvasTkAgg(fig1, root)
+canvas2 = tk.Frame(root, padx=5, pady=5)
+canvas2.pack(side="left", padx=5,pady=5, fill="y")
 
-def button_update(image_number, refinement_number):
+def button_update(image_number, refinement_number, view_type):
     global canvas1
+    global canvas2
     global side_frame
 
     image_number = image_number % len(figure_list)
     
-    side_frame.grid_forget()
     for child in side_frame.winfo_children():
         child.destroy()
 
-    canvas1.get_tk_widget().pack_forget()
-    canvas1 = FigureCanvasTkAgg(figure_list[image_number][refinement_number], root)
-    canvas1.draw()
-    canvas1.get_tk_widget().pack(side="right", fill="both", expand=True)
+    for child in canvas2.winfo_children():
+        child.destroy()
     
-    button_back = tk.Button(side_frame, text = "<<", command=lambda: button_update(image_number-1, 0), width=5)
+    canvas2.pack_forget()
+    canvas2 = tk.Frame(root, padx=5, pady=5)
+    canvas2.pack(side="left", padx=5,pady=5, fill="y")
+
+    canvas1.get_tk_widget().pack_forget()
+    
+    if view_type:
+        curr_df = df_list[image_number][refinement_number]
+        for j in range(len(curr_df.columns)):
+            tk.Label(text=curr_df.columns[j].replace('_', ' ').title(), master=canvas2, font='Helvetica 10 bold').grid(row=0,column=j, sticky="W", padx=10, pady=5)
+            
+            for i in range(len(curr_df)):
+                tk.Label(text=curr_df.iloc[i,j], master=canvas2).grid(row=i+1,column=j, sticky="W", padx=10)
+    else:
+        canvas1 = FigureCanvasTkAgg(figure_list[image_number][refinement_number], root)
+        canvas1.draw()
+        canvas1.get_tk_widget().pack(side="right", fill="both", expand=True)
+        
+    
+    button_back = tk.Button(side_frame, text = "<<", command=lambda: button_update(image_number-1, 0, view_type), width=5)
     curr_fig = tk.Label(text="Fig: "+str(image_number+1), master=side_frame, width=5, pady=20)
     curr_ref = tk.Label(text="Ref: "+chr(ord('`')+refinement_number+1), master=side_frame, width=5)
-    button_next = tk.Button(side_frame, text = ">>", command=lambda: button_update(image_number+1, 0), width=5)
+    button_next = tk.Button(side_frame, text = ">>", command=lambda: button_update(image_number+1, 0, view_type), width=5)
+    table_view = tk.Button(side_frame, text = "<o>", command=lambda: button_update(image_number, 0, not view_type), width=5)
 
+    table_view.grid(row=1,column=0)
     button_back.grid(row=0, column=0)
     curr_fig.grid(row=0, column=1)
     curr_ref.grid(row=1, column=1)
     button_next.grid(row=0, column=2)
 
     for i in range(len(figure_list[image_number])):
-        tk.Button(side_frame, text = chr(ord('`')+i+1), command=lambda i=i: button_update(image_number, i), width=8).grid(row=i+2,column=1, pady=2)
+        tk.Button(side_frame, text = chr(ord('`')+i+1), command=lambda i=i: button_update(image_number, i, view_type), width=8).grid(row=i+2,column=1, pady=2)
 
     
 
-button_update(0, 0)
+button_update(0, 0, False)
 root.mainloop()
