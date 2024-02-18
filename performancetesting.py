@@ -6,12 +6,14 @@ from sqlalchemy import create_engine
 def testQuery(num, star, snowflake):
     base_query = []
     snowflake_query = []
+    wrangled_query = []
     index1_query = []
     index2_query = []
     index3_query = []
 
     connectToDatabase(star, base_query, "mco1datawarehouse")
     connectToDatabase(snowflake, snowflake_query, "mco1datawarehouse2")
+    connectToDatabase(star, wrangled_query, "mco1datawarehouse")
     connectToDatabase(star, index1_query, "mco1datawarehouseindex1")
     connectToDatabase(star, index2_query, "mco1datawarehouseindex2")
     connectToDatabase(star, index3_query, "mco1datawarehouseindex3")
@@ -19,6 +21,7 @@ def testQuery(num, star, snowflake):
     print("QUERY", num, "SUMMARY RESULTS:")
     print("BASE QUERY:", sum(base_query) / len(base_query))
     print("SNOWFLAKE QUERY:", sum(snowflake_query) / len(snowflake_query))
+    print("WRANGLED QUERY:", sum(wrangled_query) / len(wrangled_query))
     print("INDEX1 QUERY (MAINSPECIALTY):", sum(index1_query) / len(index1_query))
     print("INDEX2 QUERY (REGION, PROVINCE, CITY):", sum(index2_query) / len(index2_query))
     print("INDEX2 QUERY (TIMEQUEUED):", sum(index3_query) / len(index3_query))
