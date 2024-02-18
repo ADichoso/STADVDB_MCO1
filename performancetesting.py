@@ -46,7 +46,7 @@ def testQuery(num, star, snowflake):
 def connectToDatabase(query, time_array, databasename):
     engine = create_engine("mysql://root:Aaron101702@localhost/" + databasename)
     
-    for i in range(0, 300):
+    for i in range(0, 100):
         with engine.connect() as conn, conn.begin():
                 start_time = time.perf_counter()
                 pd.read_sql(query, conn)
