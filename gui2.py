@@ -18,7 +18,7 @@ def connectToDatabase(query):
     'raise_on_warnings': True
     }
 
-    engine = create_engine("mysql://Aaron101702:admin@localhost/mco1datawarehouse")
+    engine = create_engine("mysql://root:Aaron101702@localhost/mco1datawarehouse")
     with engine.connect() as conn, conn.begin():
         return pd.read_sql(query, conn)
     
