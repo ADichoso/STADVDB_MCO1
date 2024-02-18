@@ -12,13 +12,13 @@ from sqlalchemy import create_engine
 def connectToDatabase(query):
     config = {
     'user': 'root',
-    'password': 'Aaron101702',
+    'password': 'admin',
     'host': 'localhost',
     'database': 'mco1datawarehouse',
     'raise_on_warnings': True
     }
 
-    engine = create_engine("mysql://root:Aaron101702@localhost/mco1datawarehouse")
+    engine = create_engine("mysql://root:admin@localhost/mco1datawarehouse")
     with engine.connect() as conn, conn.begin():
         return pd.read_sql(query, conn)
     
@@ -44,93 +44,65 @@ if (not _DEBUG):
     print(query4_df)
     print(query5_df)
 
-df1 = pd.read_csv("datasets/number1/1.csv")
-#group data by city
-grouped = df1.groupby('city')
-fig1, ax1 = plt.subplots()
-#plot data for each city
-for city, group in grouped:
-    ax1.bar(group['appointment_year'], group['virtual_appointments'], label=f'{city} - Virtual')
-    ax1.bar(group['appointment_year'], group['non_virtual_appointments'], label=f'{city} - Non-Virtual')
-#set labels
+fig1, ax1 = plt.subplots(figsize=(10, 6))
+query1_df.plot(kind='bar', x='appointment_year', y=['virtual_appointments', 'non_virtual_appointments'], ax=ax1)
+ax1.set_title('Virtual vs Non-Virtual Appointments Over Years')
 ax1.set_xlabel('Year')
 ax1.set_ylabel('Number of Appointments')
-ax1.set_title('Appointments by City')
-ax1.legend()
+ax1.legend(['Virtual Appointments', 'Non-Virtual Appointments'])
+plt.xticks(rotation=45, ha='right')
+plt.tight_layout()
 
 #########################################################################
 # Chart 1.1: refine by showing yearly count for each province (roll-up) #
 #########################################################################
-df1_1 = pd.read_csv("datasets/number1/1.1.csv")
-#group data by province
-grouped = df1_1.groupby('province')
-fig1_1, ax1_1 = plt.subplots()
-#plot data for each province
-for province, group in grouped:
-    ax1_1.plot(group['appointment_year'], group['virtual_appointments'], label=f'{province} - Virtual')
-    ax1_1.plot(group['appointment_year'], group['non_virtual_appointments'], label=f'{province} - Non-Virtual')
-#set labels
+query1_1_df = query1_df.groupby(['appointment_year', 'province']).size().reset_index(name='yearly_count')
+fig1_1, ax1_1 = plt.subplots(figsize=(10, 6))
+query1_1_df.pivot(index='appointment_year', columns='province', values='yearly_count').plot(kind='bar', ax=ax1_1)
+ax1_1.set_title('Yearly Count of Appointments per Province')
 ax1_1.set_xlabel('Year')
 ax1_1.set_ylabel('Number of Appointments')
-ax1_1.set_title('Appointments Trend by Province')
-ax1_1.legend()
-ax1_1.grid(True)
+ax1_1.legend(title='Province', bbox_to_anchor=(1.05, 1), loc='upper left')
+plt.tight_layout()
 
 #######################################################################
 # Chart 1_2: refine by showing yearly count for each region (roll-up) #
 #######################################################################
-df1_2 = pd.read_csv("datasets/number1/1.2.csv")
-#filter data
-df_ncr = df1_2[df1_2['region_name'] == "National Capital Region (NCR)"]
-fig1_2, ax1_2 = plt.subplots()
-#plot data
-ax1_2.plot(df_ncr['appointment_year'], df_ncr['virtual_appointments'], label='NCR - Virtual')
-ax1_2.plot(df_ncr['appointment_year'], df_ncr['non_virtual_appointments'], label='NCR - Non-Virtual')
-#set labels
+query1_2_df = query1_df.groupby(['appointment_year', 'region_name']).size().reset_index(name='yearly_count')
+fig1_2, ax1_2 = plt.subplots(figsize=(10, 6))
+query1_2_df.pivot(index='appointment_year', columns='region_name', values='yearly_count').plot(kind='bar', ax=ax1_2)
+ax1_2.set_title('Yearly Count of Appointments per Region')
 ax1_2.set_xlabel('Year')
 ax1_2.set_ylabel('Number of Appointments')
-ax1_2.set_title('NCR Appointments Trend')
-ax1_2.legend()
-ax1_2.grid(True)
+ax1_2.legend(title='Region', bbox_to_anchor=(1.05, 1), loc='upper left')
+plt.tight_layout()
 
 #########################################################################################################
 # Chart 1_3: only look at 1 specific year (showing appointments for each city in the year 2020) (slice) #
 #########################################################################################################
-df1_3 = pd.read_csv("datasets/number1/1.3.csv")
-#filter data for year 2020
-df_2020 = df1_3[df1_3['appointment_year'] == 2020]
-fig1_3, ax1_3 = plt.subplots()
-#plot data
-ax1_3.bar(df_2020['city'], df_2020['virtual_appointments'], label='Virtual Appointments')
-ax1_3.bar(df_2020['city'], df_2020['non_virtual_appointments'], bottom=df_2020['virtual_appointments'], label='Non-Virtual Appointments')
-#set labels
+query1_3_df = query1_df.groupby('city').size().reset_index(name='appointment_count')
+fig1_3, ax1_3 = plt.subplots(figsize=(10, 6))
+ax1_3.bar(query1_3_df['city'], query1_3_df['appointment_count'])
+ax1_3.set_title('Appointments per City in 2020')
 ax1_3.set_xlabel('City')
 ax1_3.set_ylabel('Number of Appointments')
-ax1_3.set_title('Appointments in 2020 by City')
-ax1_3.legend()
-#plt.xticks(rotation=45, ha='right')
+plt.xticks(rotation=45, ha='right')
+plt.tight_layout()
 
 ################################################################################################
 # Chart 1_4: Yearly count of appointments from 2020-2021, for Region IVA (CALABARZON (IV-A)) and Region IVB(MIMAROPA (IV-B)) (dice) #
 ################################################################################################
-df1_4 = pd.read_csv("datasets/number1/1.4.csv")
-#filter data for region iva and region ivb and years 2020-2021
-regions = ["CALABARZON (IV-A)", "MIMAROPA (IV-B)"]
-years = [2020, 2021]
-df_filtered = df1_4[(df1_4['region_name'].isin(regions)) & (df1_4['appointment_year'].isin(years))]
-fig1_4, ax1_4 = plt.subplots()
-# group data by region name and year
-grouped = df_filtered.groupby(['region_name', 'appointment_year'])
-# plot the data
-for (region, year), group in grouped:
-    ax1_4.plot(group['appointment_year'], group['virtual_appointments'], label=f'{region} - Virtual ({year})', marker='o')
-    ax1_4.plot(group['appointment_year'], group['non_virtual_appointments'], label=f'{region} - Non-Virtual ({year})', marker='o')
-# set labels
+query1_4_df = query1_df[((query1_df['region_name'] == 'National Capital Region (NCR)') | (query1_df['region_name'] == 'CALABARZON (IV-A)')) & (query1_df['appointment_year'].isin([2020, 2021]))]
+yearly_count_df = query1_4_df.groupby(['appointment_year', 'region_name']).size().reset_index(name='yearly_count')
+fig1_4, ax1_4 = plt.subplots(figsize=(10, 6))
+for region in ['National Capital Region (NCR)', 'CALABARZON (IV-A)']:
+    region_data = yearly_count_df[yearly_count_df['region_name'] == region]
+    ax1_4.bar(region_data['appointment_year'], region_data['yearly_count'], label=region)
+ax1_4.set_title('Yearly Count of Appointments in National Capital Region (NCR) and CALABARZON (IV-A) (2020-2021)')
 ax1_4.set_xlabel('Year')
 ax1_4.set_ylabel('Number of Appointments')
-ax1_4.set_title('Yearly Appointments for Regions IVA and IVB')
-ax1_4.grid(True)
-
+ax1_4.legend(title='Region')
+plt.tight_layout()
 
 #######################################################
 # Chart 2: Total number of appointments per specialty #
@@ -327,7 +299,7 @@ figure_list = [
 ]
 
 df_list = [
-    [df1, df1_1, df1_2, df1_3, df1_4],
+    [query1_df, query1_1_df, query1_2_df, query1_3_df, query1_4_df],
     [df2, df2_1, df2_2, df2_3],
     [df3, df3_1, df3_2], 
     [df4, df4_1, df4_1_1]
