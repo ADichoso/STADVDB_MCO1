@@ -365,6 +365,8 @@ def button_update(image_number, refinement_number, view_type):
     global canvas1
     global canvas2
     global side_frame
+    global main_canvas
+    global scrollbar
 
     image_number = image_number % len(figure_list)
     
@@ -408,6 +410,9 @@ def button_update(image_number, refinement_number, view_type):
     for i in range(len(figure_list[image_number])):
         tk.Button(side_frame, text = chr(ord('`')+i+1), command=lambda i=i: button_update(image_number, i, view_type), width=8).grid(row=i+2,column=1, pady=2)
 
+    main_canvas.yview_moveto(0)
+    main_canvas.update_idletasks()
+    main_canvas.configure(scrollregion=main_canvas.bbox("all"))
     
 
 button_update(0, 0, False)
