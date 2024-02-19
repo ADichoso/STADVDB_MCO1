@@ -12,13 +12,13 @@ from sqlalchemy import create_engine
 def connectToDatabase(query):
     config = {
     'user': 'root',
-    'password': 'admin',
+    'password': 'Aaron101702',
     'host': 'localhost',
     'database': 'mco1datawarehouse',
     'raise_on_warnings': True
     }
 
-    engine = create_engine("mysql://root:admin@localhost/mco1datawarehouse")
+    engine = create_engine("mysql://root:Aaron101702@localhost/mco1datawarehouse")
     with engine.connect() as conn, conn.begin():
         return pd.read_sql(query, conn)
     
