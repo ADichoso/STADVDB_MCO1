@@ -1,0 +1,20 @@
+[{
+	"operation": "shift",
+	"spec": {
+		"*": "&",
+		"#10-19": "newrange"
+	}
+}, {
+	"operation": "remove",
+	"spec": {
+		"agerange": ""
+	}
+}, {
+	"operation": "shift",
+	"spec": {
+		"pxid": "pxid",
+		"age": "age",
+      	"gender": "gender",
+		"newrange": "agerange"
+	}
+}]

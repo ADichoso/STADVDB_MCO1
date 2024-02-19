@@ -1,0 +1,20 @@
+[{
+	"operation": "shift",
+	"spec": {
+		"*": "&",
+		"#Internal Medicine": "newspecialty"
+	}
+}, {
+	"operation": "remove",
+	"spec": {
+		"mainspecialty": ""
+	}
+}, {
+	"operation": "shift",
+	"spec": {
+		"doctorid": "doctorid",
+		"age": "age",
+      	"agerange" : "agerange",
+		"newspecialty": "mainspecialty"
+	}
+}]
