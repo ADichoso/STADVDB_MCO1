@@ -97,6 +97,69 @@ ax1_4.set_ylabel('Number of Appointments')
 ax1_4.legend(title='Region')
 plt.tight_layout()
 
+#######################################################
+# Chart 2: Total number of appointments per specialty #
+#######################################################
+df2 = pd.read_csv("datasets/number2/2.csv")
+fig2, ax2 = plt.subplots()
+# plot data as bar chart
+ax2.bar(df2['specialty'], df2['total_appointments'], color='skyblue')
+# set labels
+ax2.set_xlabel('Specialty')
+ax2.set_ylabel('Total Appointments')
+ax2.set_title('Total Appointments by Specialty')
+# plt.xticks(rotation=45, ha='right')
+
+###########################################################################
+# Chart 2.1: refine by showing yearly count of appointments per specialty #
+###########################################################################
+df2_1 = pd.read_csv("datasets/number2/2.1.csv")
+fig2_1, ax2_1 = plt.subplots()
+# group data by specialty and appointment year
+grouped = df2_1.groupby(['specialty', 'appointment_year']).sum().reset_index()
+# plot data for each specialty
+for specialty, group in grouped.groupby('specialty'):
+    ax2_1.plot(group['appointment_year'], group['total_appointments'], label=specialty)
+# set labels
+ax2_1.set_xlabel('Year')
+ax2_1.set_ylabel('Total Appointments')
+ax2_1.set_title('Yearly Appointments by Specialty')
+ax2_1.legend()
+ax2_1.grid(True)
+
+############################################################################
+# Chart 2.2: Refine by showing monthly count of appointments per specialty #
+############################################################################
+df2_2 = pd.read_csv("datasets/number2/2.2.csv")
+fig2_2, ax2_2 = plt.subplots()
+# group data by specialty, appointment year, and appointment month
+grouped = df2_2.groupby(['specialty', 'appointment_year', 'appointment_month']).sum().reset_index()
+# plot data for each specialty
+for specialty, group in grouped.groupby('specialty'):
+    ax2_2.plot(group['appointment_month'], group['total_appointments'], label=specialty)
+# set labels
+ax2_2.set_xlabel('Month')
+ax2_2.set_ylabel('Total Appointments')
+ax2_2.set_title('Monthly Appointments by Specialty')
+ax2_2.legend()
+ax2_2.grid(True)
+
+########################################################################################################################################
+# Chart 2.3: Refine by filtering appointments in a certain year and specialty (I.E. 2020-2021, ENT / General Medicine, dice operation) #
+########################################################################################################################################
+df2_3 = pd.read_csv("datasets/number2/2.3.csv")
+# filter data for the specific specialty and year
+specialty = "ENT / General Medicine"
+years = [2020, 2021]
+df_filtered = df2_3[(df2_3['specialty'] == specialty) & (df2_3['appointment_year'].isin(years))]
+fig2_3, ax2_3 = plt.subplots()
+# plot data as a bar chart
+ax2_3.bar(df_filtered['appointment_year'], df_filtered['total_appointments'], color='skyblue')
+# Set labels and title
+ax2_3.set_xlabel('Appointment Year')
+ax2_3.set_ylabel('Total Appointments')
+ax2_3.set_title(f'Total Appointments for {specialty} in {years}')
+
 ################################################################################################
 # Chart 3: Average number of appointments during a specific day, for each city (monday-sunday) #
 ################################################################################################
