@@ -12,20 +12,20 @@ from sqlalchemy import create_engine
 def connectToDatabase(query):
     config = {
     'user': 'root',
-    'password': 'Aaron101702',
+    'password': 'admin',
     'host': 'localhost',
     'database': 'mco1datawarehouse',
     'raise_on_warnings': True
     }
 
-    engine = create_engine("mysql://root:Aaron101702@localhost/mco1datawarehouse")
+    engine = create_engine("mysql://root:admin@localhost/mco1datawarehouse")
     with engine.connect() as conn, conn.begin():
         return pd.read_sql(query, conn)
     
 #Create charts
-######################################################################################################################################
-# Chart 1: Get yearly count of appointments, grouped into virtual and non-virtual appointments, for each city (roll-up & drill down) #
-######################################################################################################################################
+############
+# Chart 1: #
+############
 
 if (_DEBUG):
     query1 = "SELECT c.region_name, c.province, c.city, YEAR(a.queuedate) AS appointment_year, SUM(CASE WHEN a.isvirtual = 1 THEN 1 ELSE 0 END) AS virtual_appointments, SUM(CASE WHEN a.isvirtual = 0 THEN 1 ELSE 0 END) AS non_virtual_appointments FROM appointments a JOIN clinics c ON a.clinicid = c.clinicid WHERE a.apptstatus = \"COMPLETE\" AND NOT YEAR(a.queuedate)=1970 GROUP BY c.region_name, c.province, c.city, YEAR(a.queuedate) WITH ROLLUP ORDER BY c.region_name, c.province, c.city, appointment_year;"
@@ -89,9 +89,9 @@ ax1_3.set_ylabel('Number of Appointments')
 plt.xticks(rotation=45, ha='right')
 plt.tight_layout()
 
-################################################################################################
-# Chart 1_4: Yearly count of appointments from 2020-2021, for Region IVA (CALABARZON (IV-A)) and Region IVB(MIMAROPA (IV-B)) (dice) #
-################################################################################################
+####################################################################################################################################
+# Chart 1_4: Yearly count of appointments from 2020-2021, for National Capital Region (NCR) and Region IVB(MIMAROPA (IV-B)) (dice) #
+####################################################################################################################################
 query1_4_df = query1_df[((query1_df['region_name'] == 'National Capital Region (NCR)') | (query1_df['region_name'] == 'CALABARZON (IV-A)')) & (query1_df['appointment_year'].isin([2020, 2021]))]
 yearly_count_df = query1_4_df.groupby(['appointment_year', 'region_name']).size().reset_index(name='yearly_count')
 fig1_4, ax1_4 = plt.subplots(figsize=(10, 6))
@@ -104,165 +104,127 @@ ax1_4.set_ylabel('Number of Appointments')
 ax1_4.legend(title='Region')
 plt.tight_layout()
 
-#######################################################
-# Chart 2: Total number of appointments per specialty #
-#######################################################
-df2 = pd.read_csv("datasets/number2/2.csv")
-fig2, ax2 = plt.subplots()
-# plot data as bar chart
-ax2.bar(df2['specialty'], df2['total_appointments'], color='skyblue')
-# set labels
-ax2.set_xlabel('Specialty')
+############
+# Chart 2: #
+############
+pivot_df2 = query2_df.pivot_table(index=['specialty', 'appointment_year'], columns='appointment_month', values='total_appointments', fill_value=0)
+fig2, ax2 = plt.subplots(figsize=(12, 8))
+pivot_df2.plot(kind='bar', ax=ax2, stacked=True)
+ax2.set_title('Total Appointments per Specialty and Year')
+ax2.set_xlabel('Specialty and Year')
 ax2.set_ylabel('Total Appointments')
-ax2.set_title('Total Appointments by Specialty')
-# plt.xticks(rotation=45, ha='right')
+ax2.legend(title='Month', bbox_to_anchor=(1.05, 1), loc='upper left')
+plt.xticks(rotation=45, ha='right')
+plt.tight_layout()
+
 
 ###########################################################################
 # Chart 2.1: refine by showing yearly count of appointments per specialty #
 ###########################################################################
-df2_1 = pd.read_csv("datasets/number2/2.1.csv")
-fig2_1, ax2_1 = plt.subplots()
-# group data by specialty and appointment year
-grouped = df2_1.groupby(['specialty', 'appointment_year']).sum().reset_index()
-# plot data for each specialty
-for specialty, group in grouped.groupby('specialty'):
-    ax2_1.plot(group['appointment_year'], group['total_appointments'], label=specialty)
-# set labels
-ax2_1.set_xlabel('Year')
-ax2_1.set_ylabel('Total Appointments')
-ax2_1.set_title('Yearly Appointments by Specialty')
-ax2_1.legend()
-ax2_1.grid(True)
+query2_1_df= query2_df.groupby(['specialty', 'appointment_year'])['total_appointments'].sum().reset_index()
+pivot_df = query2_1_df.pivot(index='specialty', columns='appointment_year', values='total_appointments')
+fig2_1, ax2_1 = plt.subplots(figsize=(12, 8))
+pivot_df.plot(kind='bar', ax=ax2_1)
+ax2_1.set_title('Yearly Count of Appointments per Specialty')
+ax2_1.set_xlabel('Specialty')
+ax2_1.set_ylabel('Number of Appointments')
+plt.xticks(rotation=45, ha='right')
+plt.tight_layout()
 
 ############################################################################
 # Chart 2.2: Refine by showing monthly count of appointments per specialty #
 ############################################################################
-df2_2 = pd.read_csv("datasets/number2/2.2.csv")
-fig2_2, ax2_2 = plt.subplots()
-# group data by specialty, appointment year, and appointment month
-grouped = df2_2.groupby(['specialty', 'appointment_year', 'appointment_month']).sum().reset_index()
-# plot data for each specialty
-for specialty, group in grouped.groupby('specialty'):
-    ax2_2.plot(group['appointment_month'], group['total_appointments'], label=specialty)
-# set labels
-ax2_2.set_xlabel('Month')
-ax2_2.set_ylabel('Total Appointments')
-ax2_2.set_title('Monthly Appointments by Specialty')
-ax2_2.legend()
-ax2_2.grid(True)
+query2_2_df = query2_df.groupby(['specialty', 'appointment_year', 'appointment_month'])['total_appointments'].sum().reset_index()
+fig2_2, ax2_2 = plt.subplots(figsize=(10, 6))
+for specialty, data in query2_2_df.groupby('specialty'):
+    ax2_2 .plot(data['appointment_month'], data['total_appointments'], label=specialty)
+ax2_2 .set_title('Monthly Count of Appointments per Specialty')
+ax2_2 .set_xlabel('Month')
+ax2_2 .set_ylabel('Number of Appointments')
+ax2_2 .legend(title='Specialty', bbox_to_anchor=(1.05, 1), loc='upper left')
+plt.tight_layout()
 
 ########################################################################################################################################
 # Chart 2.3: Refine by filtering appointments in a certain year and specialty (I.E. 2020-2021, ENT / General Medicine, dice operation) #
 ########################################################################################################################################
-df2_3 = pd.read_csv("datasets/number2/2.3.csv")
-# filter data for the specific specialty and year
-specialty = "ENT / General Medicine"
-years = [2020, 2021]
-df_filtered = df2_3[(df2_3['specialty'] == specialty) & (df2_3['appointment_year'].isin(years))]
-fig2_3, ax2_3 = plt.subplots()
-# plot data as a bar chart
-ax2_3.bar(df_filtered['appointment_year'], df_filtered['total_appointments'], color='skyblue')
-# Set labels and title
-ax2_3.set_xlabel('Appointment Year')
-ax2_3.set_ylabel('Total Appointments')
-ax2_3.set_title(f'Total Appointments for {specialty} in {years}')
+#query2_df['appointment_year'] = pd.Categorical(query2_df['appointment_year'])
+filtered_df = query2_df[((query2_df['appointment_year'] == 2020) | (query2_df['appointment_year'] == 2021)) &
+                        (query2_df['specialty'].isin(['General Medicine', 'DERMATOLOGY']))]
+query2_3_df  = filtered_df.groupby(['specialty', 'appointment_year'])['total_appointments'].sum().reset_index()
+fig2_3, ax2_3 = plt.subplots(figsize=(10, 6))
+for specialty, data in query2_3_df .groupby('specialty'):
+    ax2_3.bar(data['appointment_year'], data['total_appointments'], label=specialty)
+ax2_3.set_title('Yearly Count of Appointments for General Medicine and Dermatology (2020-2021)')
+ax2_3.set_xlabel('Year')
+ax2_3.set_ylabel('Number of Appointments')
+ax2_3.legend(title='Specialty')
+plt.tight_layout()
 
-################################################################################################
-# Chart 3: Average number of appointments during a specific day, for each city (monday-sunday) #
-################################################################################################
-df3 = pd.read_csv("datasets/number3/3.csv")
-fig3, ax3 = plt.subplots()
-# plot data as a bar chart
-ax3.bar(df3['city'], df3['avg_appointments_on_monday'], color='skyblue')
-# set labels and title
-ax3.set_xlabel('City')
-ax3.set_ylabel('Average Appointments on Mondays')
-ax3.set_title('Average Appointments on Mondays by City')
-#plt.xticks(rotation=45, ha='right')
+############
+# Chart 3: #
+############
+fig3, ax3 = plt.subplots(figsize=(12, 8))
+for region in query3_df['region_name'].unique():
+    region_data = query3_df[query3_df['region_name'] == region]
+    ax3.plot(region_data['day_of_appointment'], region_data['AVG(D.appts)'], label=region)
+ax3.set_title('Average Appointments per Day of the Week')
+ax3.set_xlabel('Day of the Week')
+ax3.set_ylabel('Average Appointments')
+ax3.legend(title='Region', bbox_to_anchor=(1.05, 1), loc='upper left')
+ax3.grid(True)
+plt.xticks(range(1, 8), ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'])
+plt.tight_layout()
 
-##############################################################################
-# Chart 3.1: Refine to group appointment count according to appointment type #
-##############################################################################
-df3_1 = pd.read_csv("datasets/number3/3.1.csv")
-fig3_1, ax3_1 = plt.subplots()
-# group data by city and appointment type
-grouped = df3_1.groupby(['city', 'appttype']).mean().reset_index()
-# get unique cities and appointment types
-cities = grouped['city'].unique()
-appointment_types = grouped['appttype'].unique()
-# set width of bars
-bar_width = 0.35
-# set index for x-axis
-index = range(len(cities))
-# plot data for each appointment type
-for i, appt_type in enumerate(appointment_types):
-    avg_appointments = grouped[grouped['appttype'] == appt_type]['avg_appointments_on_monday']
-    ax3_1.bar([x + i * bar_width for x in index], avg_appointments, bar_width, label=appt_type)
-# set labels and title
+#####################################################################################################
+# Chart 3.1: Refine to show the average number of appointments in a specific city on mondays (dice) #
+#####################################################################################################
+query3_1_df = query3_df[(query3_df['city'] == 'Manila') & (query3_df['day_of_appointment'] == 2)]
+average_appointments = query3_1_df['AVG(D.appts)'].mean()
+fig3_1, ax3_1 = plt.subplots(figsize=(8, 6))
+ax3_1.bar('Manila', average_appointments)
+ax3_1.set_title('Average Appointments in Manila on Mondays')
 ax3_1.set_xlabel('City')
-ax3_1.set_ylabel('Average Appointments on Mondays')
-ax3_1.set_title('Average Appointments on Mondays by City and Appointment Type')
-ax3_1.set_xticks([x + bar_width * (len(appointment_types) - 1) / 2 for x in index])
-ax3_1.set_xticklabels(cities)
-ax3_1.legend()
+ax3_1.set_ylabel('Average Appointments')
+plt.tight_layout()
 
-########################################################################
-# Chart 3.2: Refine to show Appointments in Clinics in a specific city #
-########################################################################
-df3_2 = pd.read_csv("datasets/number3/3.2.csv")
-# specify the city you're interested in
-city_of_interest = "Manila"
-# filter data for the specific city
-df_filtered = df3_2[df3_2['city'] == city_of_interest]
-# calculate the average number of appointments on Mondays for the city
-avg_appointments = df_filtered['avg_appointments_on_monday'].mean()
-# create a figure and axis for plotting
-fig3_2, ax3_2 = plt.subplots()
-# create a bar chart
-ax3_2.bar(city_of_interest, avg_appointments, color='skyblue')
-# add labels and title
-ax3_2.set_xlabel('City')
-ax3_2.set_ylabel('Average Appointments on Mondays')
-ax3_2.set_title(f'Average Appointments on Mondays in Clinics in {city_of_interest}')
+####################################################################################################
+# Chart 3.2: Refine to show the average number of appointments on weekends versus weekdays (slice) #
+####################################################################################################
+def categorize_day(day):
+    if day in [1, 7]:  # Saturday or Sunday
+        return 'Weekend'
+    else:
+        return 'Weekday'
+query3_df['day_category'] = query3_df['day_of_appointment'].apply(categorize_day)
+query3_2_df = query3_df.groupby('day_category')['AVG(D.appts)'].mean()
+fig3_2, ax3_2 = plt.subplots(figsize=(8, 6))
+query3_2_df.plot(kind='bar', ax=ax3_2, color=['blue', 'green'])
+ax3_2.set_title('Average Appointments: Weekends vs Weekdays')
+ax3_2.set_xlabel('Day Category')
+ax3_2.set_ylabel('Average Appointments')
+ax3_2.set_xticklabels(query3_2_df.index, rotation=0)
+query3_2_df = query3_2_df.reset_index()
+query3_2_df.columns = ['Day Category', 'Average Appointments']
+plt.tight_layout()
  
-##########################################################################################################################################################################
-# Chart 4: Average age and average appointment duration of patients taking an appointment, grouped by specialties of doctors (join, patients, appointments, and doctors) #
-##########################################################################################################################################################################
-df4 = pd.read_csv("datasets/number4/4.csv")
-df4['average_appointment_duration_minutes'] = df4['average_appointment_duration_minutes'].abs()
-fig4, ax4 = plt.subplots()
-# plot Average Patient Age
-ax4.bar(df4['mainspecialty'], df4['average_patient_age'], color='skyblue')
-ax4.set_title('Average Patient Age by Specialty')
-ax4.set_xlabel('Specialty')
-ax4.set_ylabel('Average Age')
-# add a secondary y-axis for appointment duration
-ax4i = ax4.twinx()
-ax4i.plot(df4['mainspecialty'], df4['average_appointment_duration_minutes'], color='lightgreen', marker='o', linestyle='-')
-ax4i.set_ylabel('Average Appointment Duration (minutes)')
+############
+# Chart 4: #
+############
 
-
-#############################################################################################
-# Chart 4.1: refine to group appointments according to virtual and non virtual appointments #
-#############################################################################################
-df4_1 = pd.read_csv("datasets/number4/4.1.csv")
-df4_1['average_appointment_duration_minutes'] = df4_1['average_appointment_duration_minutes'].abs()
-virtual_df = df4_1[df4_1['isvirtual'] == 1]
-non_virtual_df = df4_1[df4_1['isvirtual'] == 0]
-fig4_1, ax4_1 = plt.subplots()
-# plot average patient age for virtual and non virtual appointments
-ax4_1.bar(virtual_df['mainspecialty'], virtual_df['average_patient_age'], color='skyblue', label='Virtual')
-ax4_1.bar(non_virtual_df['mainspecialty'], non_virtual_df['average_patient_age'], color='lightgreen', label='Non-Virtual')
-ax4_1.set_title('Average Patient Age by Specialty and Appointment Type')
-ax4_1.set_xlabel('Specialty')
-ax4_1.set_ylabel('Average Age')
-ax4_1.legend()
-# add a secondary y-axis for appointment duration
-ax4_1i = ax4_1.twinx()
-# plot average appointment Duration for virtual and non virtual appointments
-ax4_1i.plot(virtual_df['mainspecialty'], virtual_df['average_appointment_duration_minutes'], color='blue', marker='o', linestyle='-', label='Virtual')
-ax4_1i.plot(non_virtual_df['mainspecialty'], non_virtual_df['average_appointment_duration_minutes'], color='green', marker='o', linestyle='-', label='Non-Virtual')
-ax4_1i.set_ylabel('Average Appointment Duration (minutes)')
+############################################################################################
+# Chart 4.1: average appointment duration per age range within each specialty (drill-down) #
+############################################################################################
+query4_1_df = query4_df.groupby(['mainspecialty', 'agerange'])['average_appointment_duration_minutes'].mean().reset_index()
+fig4_1, ax4_1 = plt.subplots(figsize=(12, 8))
+for key, grp in query4_1_df.groupby('mainspecialty'):
+    ax4_1 = grp.plot(ax=ax4_1, kind='line', x='agerange', y='average_appointment_duration_minutes', label=key)
+ax4_1.set_title('Average Appointment Duration per Age Range Within Each Specialty')
+ax4_1.set_xlabel('Age Range')
+ax4_1.set_ylabel('Average Appointment Duration (minutes)')
+ax4_1.legend(title='Specialty', bbox_to_anchor=(1.05, 1), loc='upper left')
+ax4_1.grid(True)
+plt.xticks(rotation=45, ha='right')
+plt.tight_layout()
 
 #####################################################################################
 # Chart 4.1.1: FURTHER refine to group appointments according to gender of patients #
@@ -295,14 +257,14 @@ figure_list = [
     [fig1, fig1_1, fig1_2, fig1_3, fig1_4],
     [fig2, fig2_1, fig2_2, fig2_3],
     [fig3, fig3_1, fig3_2], 
-    [fig4, fig4_1, fig4_1_1]
+    [fig4_1, fig4_1_1]
 ]
 
 df_list = [
     [query1_df, query1_1_df, query1_2_df, query1_3_df, query1_4_df],
-    [df2, df2_1, df2_2, df2_3],
-    [df3, df3_1, df3_2], 
-    [df4, df4_1, df4_1_1]
+    [query2_df, query2_1_df, query2_2_df, query2_3_df],
+    [query3_df, query3_1_df, query3_2_df], 
+    [query4_df, query4_1_df, df4_1_1]
 ]
 
 #GUI
